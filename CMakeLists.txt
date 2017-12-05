@@ -10,8 +10,8 @@ set(CAFFE2_VERSION
     "${CAFFE2_VERSION_MAJOR}.${CAFFE2_VERSION_MINOR}.${CAFFE2_VERSION_PATCH}")
 
 # FFMPEG
-set(FFMPEG_INCLUDE_DIR /home/xiaolonw/anaconda2/envs/caffe2/include)
-set(FFMPEG_LIBRARIES /home/xiaolonw/anaconda2/envs/caffe2/lib)
+# set(FFMPEG_INCLUDE_DIR /home/xiaolonw/anaconda2/envs/caffe2/include)
+# set(FFMPEG_LIBRARIES /home/xiaolonw/anaconda2/envs/caffe2/lib)
 
 
 # ---[ Options.
@@ -25,7 +25,7 @@ option(BUILD_TEST "Build C++ test binaries (need gtest and gbenchmark)" ON)
 option(USE_ATEN "Use ATen" OFF)
 option(USE_ASAN "Use Address Sanitizer" OFF)
 option(USE_CUDA "Use Cuda" ON)
-option(USE_FFMPEG "Use ffmpeg" OFF)
+option(USE_FFMPEG "Use ffmpeg" ON)
 option(USE_GFLAGS "Use GFLAGS" ON)
 option(USE_GLOG "Use GLOG" ON)
 option(USE_GLOO "Use Gloo" ON)
