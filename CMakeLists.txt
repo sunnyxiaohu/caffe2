@@ -9,6 +9,11 @@ set(CAFFE2_VERSION_PATCH 1)
 set(CAFFE2_VERSION
     "${CAFFE2_VERSION_MAJOR}.${CAFFE2_VERSION_MINOR}.${CAFFE2_VERSION_PATCH}")
 
+# FFMPEG
+set(FFMPEG_INCLUDE_DIR /home/xiaolonw/anaconda2/envs/caffe2/include)
+set(FFMPEG_LIBRARIES /home/xiaolonw/anaconda2/envs/caffe2/lib)
+
+
 # ---[ Options.
 # Note to developers: if you add an option below, make sure you also add it to
 # cmake/Summary.cmake so that the summary prints out the option values.
