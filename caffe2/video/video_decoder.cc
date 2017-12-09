@@ -78,6 +78,8 @@ void VideoDecoder::decodeLoop(
       return;
     }
 
+    CAFFE_ENFORCE(len >= probeSz - AVPROBE_PADDING_SIZE, "Insufficient data to determine video format");
+
     // seek back to start of stream
     ioctx.seek(0, SEEK_SET);
 
@@ -119,6 +121,7 @@ void VideoDecoder::decodeLoop(
                  << ffmpegErrorStr(ret);
       return;
     }
+    AFFE_ENFORCE(videoStream_ != nullptr, "Unable to find video stream");
 
     // Initialize codec
     videoCodecContext_ = videoStream_->codec;
