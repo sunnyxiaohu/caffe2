@@ -121,7 +121,7 @@ void VideoDecoder::decodeLoop(
                  << ffmpegErrorStr(ret);
       return;
     }
-    AFFE_ENFORCE(videoStream_ != nullptr, "Unable to find video stream");
+    CAFFE_ENFORCE(videoStream_ != nullptr, "Unable to find video stream");
 
     // Initialize codec
     videoCodecContext_ = videoStream_->codec;
