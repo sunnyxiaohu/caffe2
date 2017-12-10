@@ -396,7 +396,8 @@ bool DecodeClipFromVideoFile(
     const int height,
     const int width,
     const int sampling_rate,
-    float*& buffer) {
+    float*& buffer,
+    std::mt19937* randgen) {
   Params params;
   std::vector<std::unique_ptr<DecodedFrame>> sampledFrames;
   VideoDecoder decoder;
@@ -413,10 +414,24 @@ bool DecodeClipFromVideoFile(
   int channel_size = 0;
   int image_size = 0;
   int data_size = 0;
+  CAFFE_ENFORCE_LT(1, sampledFrames.size(), "video cannot be empty");
 
-  int end_frm = start_frm + length * sampling_rate;
-  for (int i = start_frm; i < end_frm; i += sampling_rate) {
-    if (i == start_frm) {
+  int use_start_frm = start_frm;
+  if (start_frm < 0) { // perform temporal jittering
+    if ((int)(sampledFrames.size() - length * sampling_rate) > 0) {
+      use_start_frm = std::uniform_int_distribution<>(
+          0, (int)(sampledFrames.size() - length * sampling_rate))(*randgen);
+    } else {
+      use_start_frm = 0;
+    }
+  }
+
+  // int end_frm = start_frm + length * sampling_rate;
+  // for (int i = start_frm; i < end_frm; i += sampling_rate) {
+  for (int idx = 0; idx < length; idx ++){
+    int i = use_start_frm + idx * sampling_rate;
+    i = i % (int)(sampledFrames.size());
+    if (idx == 0) {
       image_size = sampledFrames[i]->height_ * sampledFrames[i]->width_;
       channel_size = image_size * length;
       data_size = channel_size * 3;

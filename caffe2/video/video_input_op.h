@@ -259,9 +259,10 @@ bool VideoInputOp<Context>::GetClipAndLabelFromDBValue(
             buffer));
       } else {
         if (temporal_jitter_) {
-          int num_of_frames = GetNumberOfFrames(filename);
-          start_frm = std::uniform_int_distribution<>(
-              0, num_of_frames - length_ * sampling_rate_ + 1)(*randgen);
+          // int num_of_frames = GetNumberOfFrames(filename);
+          //start_frm = std::uniform_int_distribution<>(
+          //    0, num_of_frames - length_ * sampling_rate_ + 1)(*randgen);
+          start_frm = -1;
           CHECK(DecodeClipFromVideoFile(
               filename,
               start_frm,
@@ -269,7 +270,8 @@ bool VideoInputOp<Context>::GetClipAndLabelFromDBValue(
               scale_h_,
               scale_w_,
               sampling_rate_,
-              buffer));
+              buffer,
+              randgen));
         } else {
           CHECK(DecodeClipFromVideoFile(
               filename,
@@ -278,7 +280,8 @@ bool VideoInputOp<Context>::GetClipAndLabelFromDBValue(
               scale_h_,
               scale_w_,
               sampling_rate_,
-              buffer));
+              buffer,
+              randgen));
         }
       }
     }
