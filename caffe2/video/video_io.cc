@@ -493,6 +493,9 @@ bool DecodeClipFromMemoryBuffer(
     }
   }
 
+  CAFFE_ENFORCE_LT(1, sampledFrames.size(), "video cannot be empty");
+
+  /*
   if (sampledFrames.size() < length * sampling_rate) {
     LOG(ERROR)
         << "The video seems faulty and we could not decode suffient samples";
@@ -511,9 +514,13 @@ bool DecodeClipFromMemoryBuffer(
       end_frm,
       sampledFrames.size(),
       "Ending frame must less than or equal total number of video frames");
+  */
 
-  for (int i = use_start_frm; i < end_frm; i += sampling_rate) {
-    if (i == use_start_frm) {
+  //for (int i = use_start_frm; i < end_frm; i += sampling_rate) {
+  for (int idx = 0; idx < length; idx ++){
+    int i = use_start_frm + idx * sampling_rate;
+    i = i % (int)(sampledFrames.size());
+    if (idx == 0) {
       image_size = sampledFrames[i]->height_ * sampledFrames[i]->width_;
       channel_size = image_size * length;
       data_size = channel_size * 3;
