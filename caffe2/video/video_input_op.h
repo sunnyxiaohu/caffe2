@@ -87,6 +87,7 @@ class VideoInputOp final : public PrefetchOperator<Context> {
   bool use_local_file_;
   bool is_test_;
   std::string im_extension_;
+  int sample_times_;
 
   // thread pool for parse + decode
   int num_decode_threads_;
@@ -124,6 +125,8 @@ VideoInputOp<Context>::VideoInputOp(
           0)),
       im_extension_(
           OperatorBase::template GetSingleArgument<string>("im_extension", "")),
+      sample_times_(
+          OperatorBase::template GetSingleArgument<int>("sample_times", 10)),
       num_decode_threads_(
           OperatorBase::template GetSingleArgument<int>("decode_threads", 4)),
 
@@ -165,6 +168,7 @@ VideoInputOp<Context>::VideoInputOp(
   LOG(INFO) << "    Using " << (is_test_ ? "center" : "random") << " crop";
   LOG(INFO) << "    Using a clip of " << length_ << " frames;";
   LOG(INFO) << "    Using a sampling rate of 1:" << sampling_rate_;
+  LOG(INFO) << "    Using sample_times_:" << sample_times_;
   LOG(INFO) << "    Subtract mean " << mean_ << " and divide by std " << std_
             << ".";
   vector<TIndex> data_shape(5);
@@ -271,7 +275,8 @@ bool VideoInputOp<Context>::GetClipAndLabelFromDBValue(
               scale_w_,
               sampling_rate_,
               buffer,
-              randgen));
+              randgen,
+              sample_times_));
         } else {
           CHECK(DecodeClipFromVideoFile(
               filename,
@@ -281,7 +286,8 @@ bool VideoInputOp<Context>::GetClipAndLabelFromDBValue(
               scale_w_,
               sampling_rate_,
               buffer,
-              randgen));
+              randgen,
+              sample_times_));
         }
       }
     }

@@ -397,7 +397,8 @@ bool DecodeClipFromVideoFile(
     const int width,
     const int sampling_rate,
     float*& buffer,
-    std::mt19937* randgen) {
+    std::mt19937* randgen,
+    const int sample_times) {
   Params params;
   std::vector<std::unique_ptr<DecodedFrame>> sampledFrames;
   VideoDecoder decoder;
@@ -424,6 +425,12 @@ bool DecodeClipFromVideoFile(
     } else {
       use_start_frm = 0;
     }
+  }
+  else
+  {
+    int num_of_frames = (int)(sampledFrames.size());
+    float frame_gaps = (float)(num_of_frames) / (float)(sample_times);
+    use_start_frm = ((int)(frame_gaps * start_frm)) % num_of_frames;
   }
 
   // int end_frm = start_frm + length * sampling_rate;

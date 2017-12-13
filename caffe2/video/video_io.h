@@ -100,7 +100,8 @@ bool DecodeClipFromVideoFile(
     const int width,
     const int sampling_rate,
     float*& buffer,
-    std::mt19937* randgen);
+    std::mt19937* randgen,
+    const int sample_times);
 
 bool DecodeClipFromMemoryBuffer(
     const char* video_buffer,
