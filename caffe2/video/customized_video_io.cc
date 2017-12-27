@@ -642,6 +642,10 @@ bool DecodeClipFromVideoFileFlex(
   decoder.decodeFile(filename, params, sampledFrames);
 
   buffer = nullptr;
+  int offset = 0;
+  int channel_size = 0;
+  int image_size = 0;
+  int data_size = 0;
   CAFFE_ENFORCE_LT(1, sampledFrames.size(), "video cannot be empty");
 
   int use_start_frm = start_frm;
@@ -661,7 +665,7 @@ bool DecodeClipFromVideoFileFlex(
 
   height = (int)sampledFrames[0]->height_;
   width  = (int)sampledFrames[0]->width_;
-  
+
   for (int idx = 0; idx < length; idx ++){
     int i = use_start_frm + idx * sampling_rate;
     i = i % (int)(sampledFrames.size());
