@@ -127,10 +127,7 @@ bool DecodeClipFromVideoFileFlex(
     const int sampling_rate,
     float*& buffer,
     std::mt19937* randgen,
-    const int use_multi_clips,
-    const int batch_size,  // number of returned clips
-    const int num_multi_clips,
-    const int starting_clip);
+    const int sample_times);
 
 bool DecodeClipFromMemoryBufferFlex(
     const char* video_buffer,

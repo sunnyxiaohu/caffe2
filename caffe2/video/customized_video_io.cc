@@ -628,10 +628,7 @@ bool DecodeClipFromVideoFileFlex(
     const int sampling_rate,
     float*& buffer,
     std::mt19937* randgen,
-    const int use_multi_clips,
-    const int batch_size,  // number of returned clips
-    const int num_multi_clips,
-    const int starting_clip
+    const int sample_times
   ) {
   Params params;
   std::vector<std::unique_ptr<DecodedFrame>> sampledFrames;
@@ -645,18 +642,7 @@ bool DecodeClipFromVideoFileFlex(
   decoder.decodeFile(filename, params, sampledFrames);
 
   buffer = nullptr;
-  int frame_gaps;
-  if (use_multi_clips) {
-    CAFFE_ENFORCE_EQ(start_frm, 0, "start_frm must be 0 if using mult clips.");
-
-    frame_gaps =
-      std::max((int)(sampledFrames.size()) - length * sampling_rate, 0)
-      / num_multi_clips;
-  } else {
-    CAFFE_ENFORCE_EQ(batch_size, 1,
-      "batch_size must be 1 if not using mult clips.");
-    frame_gaps = 0;
-  }
+  CAFFE_ENFORCE_LT(1, sampledFrames.size(), "video cannot be empty");
 
   int use_start_frm = start_frm;
   if (start_frm < 0) { // perform temporal jittering
@@ -665,43 +651,38 @@ bool DecodeClipFromVideoFileFlex(
           0, (int)(sampledFrames.size() - length * sampling_rate))(*randgen);
     } else { use_start_frm = 0; }
   }
-
-  if (sampledFrames.size() == 0) {
-    LOG(ERROR) << "This video is empty.";
-    buffer = nullptr;
-    return true;
+  else
+  {
+    int num_of_frames = (int)(sampledFrames.size());
+    float frame_gaps = (float)(num_of_frames) / (float)(sample_times);
+    use_start_frm = ((int)(frame_gaps * start_frm)) % num_of_frames;
   }
+
 
   height = (int)sampledFrames[0]->height_;
   width  = (int)sampledFrames[0]->width_;
+  
+  for (int idx = 0; idx < length; idx ++){
+    int i = use_start_frm + idx * sampling_rate;
+    i = i % (int)(sampledFrames.size());
+    if (idx == 0) {
+      image_size = sampledFrames[i]->height_ * sampledFrames[i]->width_;
+      channel_size = image_size * length;
+      data_size = channel_size * 3;
+      buffer = new float[data_size];
+    }
 
-  const int image_size = sampledFrames[0]->height_ * sampledFrames[0]->width_;
-  const int channel_size = image_size * length;
-  const int sample_size = channel_size * 3;
-  // batch_size is 1 if not using multi-clip
-  const int data_size = sample_size * batch_size;
-  buffer = new float[data_size];
-
-  for (int t = 0; t < batch_size; t ++) {
-    int offset = 0;
-    for (int idx = 0; idx < length; idx++) {
-      int i = use_start_frm +
-        (t + starting_clip) * frame_gaps + idx * sampling_rate;
-      // TODO{km}: consider cylindric sampling
-      i = i % (int)(sampledFrames.size());
-
-      for (int c = 0; c < 3; c++) {
-        ImageDataToBuffer(
-            (unsigned char*)sampledFrames[i]->data_.get(),
-            sampledFrames[i]->height_,
-            sampledFrames[i]->width_,
-            buffer + t * sample_size + c * channel_size + offset,
-            c);
-      } // c
-      offset += image_size;
-    } // idx
-    CAFFE_ENFORCE(offset == channel_size, "Wrong offset size");
-  } // t
+    for (int c = 0; c < 3; c++) {
+      ImageDataToBuffer(
+          (unsigned char*)sampledFrames[i]->data_.get(),
+          sampledFrames[i]->height_,
+          sampledFrames[i]->width_,
+          buffer + c * channel_size + offset,
+          c);
+    }
+    offset += image_size;
+  }
+  CAFFE_ENFORCE(offset == channel_size, "Wrong offset size");
 
   // free the sampledFrames
   for (int i = 0; i < sampledFrames.size(); i++) {

@@ -94,9 +94,7 @@ class CustomizedVideoInputOp final : public PrefetchOperator<Context> {
   int max_size_;
   bool use_scale_augmentaiton_;
 
-  int use_multi_clips_;
-  int num_multi_clips_;
-  int starting_clip_;
+  int sample_times_;
 
   std::shared_ptr<TaskThreadPool> thread_pool_;
 };
@@ -138,12 +136,8 @@ CustomizedVideoInputOp<Context>::CustomizedVideoInputOp(
       use_scale_augmentaiton_(
           OperatorBase::template GetSingleArgument<int>(
             "use_scale_augmentaiton", 0)),
-      use_multi_clips_(
-          OperatorBase::template GetSingleArgument<int>("use_multi_clips", 0)),
-      num_multi_clips_(
-          OperatorBase::template GetSingleArgument<int>("num_multi_clips", 0)),
-      starting_clip_(
-          OperatorBase::template GetSingleArgument<int>("starting_clip", 0)),
+      sample_times_(
+          OperatorBase::template GetSingleArgument<int>("sample_times", 10)),
 
       thread_pool_(new TaskThreadPool(num_decode_threads_)) {
   CAFFE_ENFORCE_GT(batch_size_, 0, "Batch size should be nonnegative.");
@@ -159,35 +153,18 @@ CustomizedVideoInputOp<Context>::CustomizedVideoInputOp(
   //     scale_w_,
   //     crop_,
   //     "The scaled width must be no smaller than the crop value.");
-  if (num_multi_clips_ > 0) {
-    CAFFE_ENFORCE_GE(
-        batch_size_,
-        0,
-        "For multi-section test, num_multi_clips must >= batch_size.");
-  } else {
-    num_multi_clips_ = batch_size_;
-  }
+
   if (multiple_label_) {
     CAFFE_ENFORCE_GT(
         num_of_labels_,
         0,
         "Number of labels must be set for using multiple label output.");
   }
-  if (!is_test_) {
-    CAFFE_ENFORCE_EQ(
-        use_multi_clips_,
-        0,
-        "Cannot use multiple clips at training.");
-  }
   if (crop_ <= 0){  // not cropping
     CAFFE_ENFORCE_EQ(
         is_test_,
         1,
         "Cannot use spatial uncrop at training.");
-    CAFFE_ENFORCE_EQ(
-        use_multi_clips_,
-        1,
-        "Cannot use spatial uncrop if not multi-clip test.");
   }
 
   // Always need a dbreader, even when using local video files
@@ -214,12 +191,8 @@ CustomizedVideoInputOp<Context>::CustomizedVideoInputOp(
   LOG(INFO) << "    Scaling image from " << min_size_ << " to " << max_size_;
   LOG(INFO) << "    Using scale augmentaiton?: " << use_scale_augmentaiton_ ;
   LOG(INFO) << "    Using BGR order?: " << use_bgr_ ;
-  if (use_multi_clips_) {
-    LOG(INFO) << "    Extracting " << num_multi_clips_ << " clips per video." ;
-    LOG(INFO) << "    Starting from the " << starting_clip_ << "-th clip." ;
-  } else {
-    LOG(INFO) << "    Extracting " << 1 << " clips per video." ;
-  }
+  LOG(INFO) << "    Using sample_times_:" << sample_times_;
+
 
   vector<TIndex> data_shape(5);
   vector<TIndex> label_shape(2);
@@ -263,25 +236,17 @@ bool CustomizedVideoInputOp<Context>::GetClipAndLabelFromDBValue(
   const TensorProto& video_proto = protos.protos(0);
   const TensorProto& label_proto = protos.protos(1);
 
-  // int start_frm = -1;
-  // if (!temporal_jitter_) {
-  //   const TensorProto& start_frm_proto = protos.protos(2);
-  //   start_frm = start_frm_proto.int32_data(0);
-  //   printf("start_frm: %d\n", start_frm);
-  // }
-  int start_frm = temporal_jitter_ ? -1 : 0;
+  int start_frm = -1;
+  if (!temporal_jitter_) {
+    const TensorProto& start_frm_proto = protos.protos(2);
+    start_frm = start_frm_proto.int32_data(0);
+  }
+  // int start_frm = temporal_jitter_ ? -1 : 0;
 
   // assign labels
   if (!multiple_label_) {
-    if (use_multi_clips_) {
-      for (int i = 0; i < batch_size_; i ++)
-        label_data[i] = label_proto.int32_data(0);
-    } else {
       label_data[0] = label_proto.int32_data(0);
-    }
   } else {
-    if (use_multi_clips_) LOG(FATAL) << "Branch not implemented.";
-
     // For multiple label case, output label is a binary vector
     // where presented concepts are makred 1
     memset(label_data, 0, sizeof(int) * num_of_labels_);
@@ -301,8 +266,6 @@ bool CustomizedVideoInputOp<Context>::GetClipAndLabelFromDBValue(
     const string& encoded_video_str = video_proto.string_data(0);
     int encoded_size = encoded_video_str.size();
     if (!use_local_file_) {
-      if (use_multi_clips_) LOG(FATAL) << "Branch not implemented.";
-
       DecodeClipFromMemoryBufferFlex(
           const_cast<char*>(encoded_video_str.data()),
           encoded_size,
@@ -342,10 +305,7 @@ bool CustomizedVideoInputOp<Context>::GetClipAndLabelFromDBValue(
             sampling_rate_,
             buffer,
             randgen,
-            use_multi_clips_,  // use_multi_clips
-            use_multi_clips_ ? batch_size_ : 1,  // batch_size
-            num_multi_clips_,  // num_multi_clips
-            starting_clip_  // starting_clip
+            sample_times_
           ));
       } // end of else (i.e., use_image_ == False)
     } // end of else (i.e., use_local_file_ == True)
@@ -394,7 +354,7 @@ void CustomizedVideoInputOp<Context>::DecodeAndTransform(
 
   if ((height_raw <= 0) || (width_raw <= 0)) return;
 
-  const int num_clips = (use_multi_clips_ ? batch_size_ : 1);
+  const int num_clips = 1;
 
   for (int i = 0; i < num_clips; i ++) {
     if (use_scale_augmentaiton_) {
@@ -510,7 +470,7 @@ bool CustomizedVideoInputOp<Context>::Prefetch() {
 
   std::bernoulli_distribution mirror_this_clip(0.5);
 
-  const int num_items = (use_multi_clips_) ? 1 : batch_size_;
+  const int num_items = batch_size_;
 
   // ------------ only useful for crop_ <= 0
   std::vector<float*> list_clip_data;
@@ -522,7 +482,7 @@ bool CustomizedVideoInputOp<Context>::Prefetch() {
   const int MAX_IMAGE_SIZE = 500 * 500;
   if (crop_ <= 0) {
     for (int item_id = 0; item_id < num_items; ++item_id) {
-      const int num_clips = batch_size_;
+      const int num_clips = 1;
       /*
       we have to allocate outside of DecodeAndTransform,
       because DecodeAndTransform does not change the values.
