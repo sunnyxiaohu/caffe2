@@ -18,7 +18,7 @@ extern "C" {
 
 namespace caffe2 {
 
-VideoDecoder::VideoDecoder() {
+CustomVideoDecoder::CustomVideoDecoder() {
   static bool gInitialized = false;
   static std::mutex gMutex;
   std::unique_lock<std::mutex> lock(gMutex);
@@ -30,7 +30,7 @@ VideoDecoder::VideoDecoder() {
   }
 }
 
-void VideoDecoder::decodeLoop(
+void CustomVideoDecoder::decodeLoop(
     const string& videoName,
     VideoIOContext& ioctx,
     const Params& params,
@@ -449,7 +449,7 @@ void VideoDecoder::decodeLoop(
   }
 }
 
-void VideoDecoder::decodeMemory(
+void CustomVideoDecoder::decodeMemory(
     const char* buffer,
     const int size,
     const Params& params,
@@ -466,7 +466,7 @@ void VideoDecoder::decodeMemory(
       decodeFromStart);
 }
 
-void VideoDecoder::decodeFile(
+void CustomVideoDecoder::decodeFile(
     const string file,
     const Params& params,
     std::vector<std::unique_ptr<DecodedFrame>>& sampledFrames,
@@ -476,7 +476,7 @@ void VideoDecoder::decodeFile(
   decodeLoop(file, ioctx, params, sampledFrames, maxFrames, decodeFromStart);
 }
 
-string VideoDecoder::ffmpegErrorStr(int result) {
+string CustomVideoDecoder::ffmpegErrorStr(int result) {
   std::array<char, 128> buf;
   av_strerror(result, buf.data(), buf.size());
   return string(buf.data());

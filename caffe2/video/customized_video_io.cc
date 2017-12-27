@@ -337,7 +337,7 @@ bool DecodeClipFromVideoFile(
     float*& buffer) {
   Params params;
   std::vector<std::unique_ptr<DecodedFrame>> sampledFrames;
-  VideoDecoder decoder;
+  CustomVideoDecoder decoder;
 
   params.outputHeight_ = height ? height : -1;
   params.outputWidth_ = width ? width : -1;
@@ -395,7 +395,7 @@ bool DecodeClipFromMemoryBuffer(
     std::mt19937* randgen) {
   Params params;
   std::vector<std::unique_ptr<DecodedFrame>> sampledFrames;
-  VideoDecoder decoder;
+  CustomVideoDecoder decoder;
 
   params.outputHeight_ = height ? height : -1;
   params.outputWidth_ = width ? width : -1;
@@ -635,7 +635,7 @@ bool DecodeClipFromVideoFileFlex(
   ) {
   Params params;
   std::vector<std::unique_ptr<DecodedFrame>> sampledFrames;
-  VideoDecoder decoder;
+  CustomVideoDecoder decoder;
 
   params.outputHeight_ = -1;
   params.outputWidth_ = -1;
@@ -727,7 +727,7 @@ bool DecodeClipFromMemoryBufferFlex(
     std::mt19937* randgen) {
   Params params;
   std::vector<std::unique_ptr<DecodedFrame>> sampledFrames;
-  VideoDecoder decoder;
+  CustomVideoDecoder decoder;
 
   params.outputHeight_ = -1;
   params.outputWidth_ =  -1;

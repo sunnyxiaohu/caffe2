@@ -347,9 +347,9 @@ struct VideoMeta {
         pixFormat(AVPixelFormat::AV_PIX_FMT_RGB24) {}
 };
 
-class VideoDecoder {
+class CustomVideoDecoder {
  public:
-  VideoDecoder();
+  CustomVideoDecoder();
 
   void decodeFile(
       const std::string filename,
