@@ -1,4 +1,4 @@
-#include "caffe2/operators/affine_channel_op.h"
+#include "caffe2/video/affine_channel_op.h"
 #include "caffe2/core/context_gpu.h"
 
 namespace caffe2 {
