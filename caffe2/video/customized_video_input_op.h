@@ -433,8 +433,8 @@ void CustomizedVideoInputOp<Context>::DecodeAndTransform(
           randgen,
           mirror_this_clip,
           is_test_,
-          use_bgr_
-          spatial_pos,
+          use_bgr_,
+          spatial_pos
         );
 
       if (buffer_scaled != nullptr)
