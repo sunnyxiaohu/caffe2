@@ -102,7 +102,8 @@ void ClipTransformFlex(
     std::mt19937* randgen,
     std::bernoulli_distribution* mirror_this_clip,
     const bool use_center_crop,
-    const bool use_bgr
+    const bool use_bgr,
+    const int spatial_pos
   );
 
 void ScaleTransform(

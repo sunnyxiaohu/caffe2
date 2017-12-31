@@ -492,7 +492,8 @@ void ClipTransformFlex(
     std::mt19937* randgen,
     std::bernoulli_distribution* mirror_this_clip,
     const bool use_center_crop,
-    const bool use_bgr
+    const bool use_bgr,
+    const int spatial_pos
   ) {
   int h_off = 0;
   int w_off = 0;
@@ -503,6 +504,12 @@ void ClipTransformFlex(
   if (use_center_crop) {
     h_off = (height - h_crop) / 2;
     w_off = (width - w_crop) / 2;
+    if (spatial_pos >= 0)
+    {
+      if (h_off > 0) h_off = h_off * spatial_pos;
+      else w_off = w_off * spatial_pos;
+    }
+
   } else {
     h_off = std::uniform_int_distribution<>(0, height - h_crop)(*randgen);
     w_off = std::uniform_int_distribution<>(0, width - w_crop)(*randgen);

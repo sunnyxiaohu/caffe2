@@ -95,6 +95,7 @@ class CustomizedVideoInputOp final : public PrefetchOperator<Context> {
   bool use_scale_augmentaiton_;
 
   int sample_times_;
+  int use_multi_crop_;
 
   std::shared_ptr<TaskThreadPool> thread_pool_;
 };
@@ -138,6 +139,8 @@ CustomizedVideoInputOp<Context>::CustomizedVideoInputOp(
             "use_scale_augmentaiton", 0)),
       sample_times_(
           OperatorBase::template GetSingleArgument<int>("sample_times", 10)),
+      use_multi_crop_(
+          OperatorBase::template GetSingleArgument<int>("use_multi_crop", 0)),
 
       thread_pool_(new TaskThreadPool(num_decode_threads_)) {
   CAFFE_ENFORCE_GT(batch_size_, 0, "Batch size should be nonnegative.");
@@ -192,6 +195,7 @@ CustomizedVideoInputOp<Context>::CustomizedVideoInputOp(
   LOG(INFO) << "    Using scale augmentaiton?: " << use_scale_augmentaiton_ ;
   LOG(INFO) << "    Using BGR order?: " << use_bgr_ ;
   LOG(INFO) << "    Using sample_times_:" << sample_times_;
+  LOG(INFO) << "    Using use_multi_crop_: " << use_multi_crop_ ;
 
 
   vector<TIndex> data_shape(5);
@@ -404,6 +408,16 @@ void CustomizedVideoInputOp<Context>::DecodeAndTransform(
       } // if i
 
       const int clip_size = *height_out * *width_out * length_ * 3;
+      int spatial_pos = -1;
+      if (use_multi_crop_ == 1)
+      {
+        // crop along the longer side
+        TensorProtos protos;
+        CAFFE_ENFORCE(protos.ParseFromString(value));
+        const TensorProto& spatial_pos_proto = protos.protos(3);
+        spatial_pos = spatial_pos_proto.int32_data(0);
+      }
+
       ClipTransformFlex(
           buffer_scaled,
           3,
@@ -420,6 +434,7 @@ void CustomizedVideoInputOp<Context>::DecodeAndTransform(
           mirror_this_clip,
           is_test_,
           use_bgr_
+          spatial_pos,
         );
 
       if (buffer_scaled != nullptr)
