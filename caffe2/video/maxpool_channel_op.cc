@@ -1,7 +1,6 @@
 #include "caffe2/video/maxpool_channel_op.h"
 
 namespace caffe2 {
-namespace {
 
 REGISTER_CPU_OPERATOR(MaxpoolChannel,
                       MaxpoolChannelOp<float, CPUContext>);
@@ -43,5 +42,4 @@ class GetMaxpoolChannelGradient : public GradientMakerBase {
 
 REGISTER_GRADIENT(MaxpoolChannel, GetMaxpoolChannelGradient);
 
-} // namespace
 } // namespace caffe2

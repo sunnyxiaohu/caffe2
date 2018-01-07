@@ -21,10 +21,10 @@ class MaxpoolChannelOp final : public Operator<Context> {
         assigned_value_(OperatorBase::GetSingleArgument<float>("assigned_value", 0)) {}
   USE_OPERATOR_CONTEXT_FUNCTIONS;
 
-  static int cmp_affinity(std::pair<float, int> &a, std::pair<float, int>  &b)
+  /*static int cmp_affinity(std::pair<float, int> &a, std::pair<float, int>  &b)
   {
     return a.first > b.first;
-  }
+  }*/
 
   bool RunOnDevice() override {
 

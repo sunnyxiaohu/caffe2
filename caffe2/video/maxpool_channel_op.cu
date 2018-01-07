@@ -1,10 +1,9 @@
-#include "caffe2/core/context_gpu.h"
 #include "caffe2/video/maxpool_channel_op.h"
+#include "caffe2/core/context_gpu.h"
 
 namespace caffe2 {
 
 namespace {
-
 template <typename T>
 __global__ void SelectTopK(
     const int n,
