@@ -27,12 +27,12 @@ OPERATOR_SCHEMA(MaxpoolChannelGradient)
 class GetMaxpoolChannelGradient : public GradientMakerBase {
   using GradientMakerBase::GradientMakerBase;
   vector<OperatorDef> GetGradientDefs() override {
-    int top_k = 10;
-    if (HasArgument(def_, "top_k")) {
-      const auto& arg = GetArgument(def_, "top_k");
-      CAFFE_ENFORCE(arg.has_i());
-      top_k = arg.i();
-    }
+    // int top_k = 10;
+    // if (HasArgument(def_, "top_k")) {
+    //   const auto& arg = GetArgument(def_, "top_k");
+    //   CAFFE_ENFORCE(arg.has_i());
+    //   top_k = arg.i();
+    // }
     return SingleGradientDef(
         "MaxpoolChannelGradient", "",
         vector<string>{O(1), GO(0)},
