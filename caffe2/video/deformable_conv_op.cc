@@ -11,7 +11,7 @@ REGISTER_CPU_OPERATOR(DeformableConvGradient,
 OPERATOR_SCHEMA(DeformableConv)
     .NumInputs(4)
     .NumOutputs(1);
-// Input: dY; Output: dX, dWeight, dBias
+// Input: X, Offset, Weight, Bias, dY; Output: dX, dWeight, dBias
 OPERATOR_SCHEMA(DeformableConvGradient)
     .NumInputs(1)
     .NumOutputs(3);
@@ -21,7 +21,7 @@ class GetDeformableConvGradient : public GradientMakerBase {
   vector<OperatorDef> GetGradientDefs() override {
     return SingleGradientDef(
         "DeformableConvGradient", "",
-        vector<string>{GO(0)},
+        vector<string>{I(0), I(1), I(2), I(3), GO(0)},
         vector<string>{GI(0), GI(2), GI(3)});
   }
 };
