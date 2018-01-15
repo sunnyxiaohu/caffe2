@@ -506,8 +506,9 @@ void ClipTransformFlex(
     w_off = (width - w_crop) / 2;
     if (spatial_pos >= 0)
     {
-      if (h_off > 0) h_off = h_off * spatial_pos;
-      else w_off = w_off * spatial_pos;
+      int now_pos = spatial_pos % 3;
+      if (h_off > 0) h_off = h_off * now_pos;
+      else w_off = w_off * now_pos;
     }
 
   } else {
@@ -518,6 +519,10 @@ void ClipTransformFlex(
   float inv_std = 1.f / std;
   int top_index, data_index;
   bool mirror_me = mirror && (*mirror_this_clip)(*randgen);
+  if (spatial_pos >= 0)
+  {
+    mirror_me = int(spatial_pos / 3);
+  }
 
   for (int c = 0; c < channels; ++c) {
     for (int l = 0; l < length; ++l) {
