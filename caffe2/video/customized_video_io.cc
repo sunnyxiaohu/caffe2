@@ -474,7 +474,7 @@ bool DecodeClipFromMemoryBuffer(
 
 
 // ----------------------------------------------------------------
-// Kaiming: customized functions follow
+// customized functions follow
 // ----------------------------------------------------------------
 
 void ClipTransformFlex(
@@ -630,7 +630,6 @@ void ScaleTransform(
 
 
 // for reading file from lmdb
-// Kaiming: we use this to support both single-clip and multi-clip sampling
 bool DecodeClipFromVideoFileFlex(
     std::string filename,
     const int start_frm,

@@ -1,4 +1,3 @@
-// Kaiming: this c code is in a terrible style; consider improving in the future
 #ifndef CUSTOMIZED_VIDEO_INPUT_OP_H_
 #define CUSTOMIZED_VIDEO_INPUT_OP_H_
 

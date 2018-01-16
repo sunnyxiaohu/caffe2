@@ -84,7 +84,7 @@ bool DecodeClipFromMemoryBuffer(
     std::mt19937* randgen);
 
 // ----------------------------------------------------------------
-// Kaiming: customized functions follow
+// customized functions follow
 // ----------------------------------------------------------------
 
 void ClipTransformFlex(
