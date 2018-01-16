@@ -409,7 +409,7 @@ void CustomizedVideoInputOp<Context>::DecodeAndTransform(
 
       const int clip_size = *height_out * *width_out * length_ * 3;
       int spatial_pos = -1;
-      if (use_multi_crop_ == 1)
+      if (use_multi_crop_ > 0)
       {
         // crop along the longer side
         TensorProtos protos;
