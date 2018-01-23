@@ -1,5 +1,5 @@
-#ifndef AFFINE_CHANNEL_OP_H_
-#define AFFINE_CHANNEL_OP_H_
+#ifndef AFFINE_ND_OP_H_
+#define AFFINE_ND_OP_H_
 
 #include "caffe2/core/context.h"
 #include "caffe2/core/logging.h"
@@ -9,9 +9,9 @@
 namespace caffe2 {
 
 template <typename T, class Context>
-class AffineChannelOp final : public Operator<Context> {
+class AffineNdOp final : public Operator<Context> {
  public:
-  AffineChannelOp(const OperatorDef& operator_def, Workspace* ws)
+  AffineNdOp(const OperatorDef& operator_def, Workspace* ws)
       : Operator<Context>(operator_def, ws) {}
   USE_OPERATOR_CONTEXT_FUNCTIONS;
 
@@ -23,9 +23,9 @@ class AffineChannelOp final : public Operator<Context> {
 };
 
 template <typename T, class Context>
-class AffineChannelGradientOp final : public Operator<Context> {
+class AffineNdGradientOp final : public Operator<Context> {
  public:
-  AffineChannelGradientOp(const OperatorDef& def, Workspace* ws)
+  AffineNdGradientOp(const OperatorDef& def, Workspace* ws)
       : Operator<Context>(def, ws) {}
   USE_OPERATOR_CONTEXT_FUNCTIONS;
 
@@ -38,4 +38,4 @@ class AffineChannelGradientOp final : public Operator<Context> {
 
 } // namespace caffe2
 
-#endif // AFFINE_CHANNEL_OP_H_
+#endif // AFFINE_ND_OP_H_

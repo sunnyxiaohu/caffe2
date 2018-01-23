@@ -1,11 +1,11 @@
-#include "caffe2/video/affine_channel_op.h"
+#include "caffe2/video/affine_nd_op.h"
 #include "caffe2/core/context_gpu.h"
 
 namespace caffe2 {
 
 namespace {
 template <typename T>
-__global__ void ScaleBiasForward(
+__global__ void ScaleBiasForwardNd(
     const int n,
     const T* in,
     const T* scale,
@@ -20,7 +20,7 @@ __global__ void ScaleBiasForward(
 }
 
 template <typename T>
-__global__ void ScaleForward(
+__global__ void ScaleForwardNd(
     const int n,
     const T* in,
     const T* scale,
@@ -35,7 +35,7 @@ __global__ void ScaleForward(
 } // namespace
 
 template <>
-bool AffineChannelOp<float, CUDAContext>::RunOnDevice() {
+bool AffineNdOp<float, CUDAContext>::RunOnDevice() {
   auto& X = Input(0);
   auto& scale = Input(1);
   auto& bias = Input(2);
@@ -43,7 +43,7 @@ bool AffineChannelOp<float, CUDAContext>::RunOnDevice() {
 
   Y->ResizeLike(X);
   const int output_size = Y->size();
-  ScaleBiasForward<float>
+  ScaleBiasForwardNd<float>
       <<<CAFFE_GET_BLOCKS(output_size),
          CAFFE_CUDA_NUM_THREADS,
          0,
@@ -59,13 +59,13 @@ bool AffineChannelOp<float, CUDAContext>::RunOnDevice() {
 }
 
 template <>
-bool AffineChannelGradientOp<float, CUDAContext>::RunOnDevice() {
+bool AffineNdGradientOp<float, CUDAContext>::RunOnDevice() {
   auto& scale = Input(0);
   auto& dY = Input(1);
   auto* dX = Output(0);
 
   dX->ResizeLike(dY);
-  ScaleForward<float>
+  ScaleForwardNd<float>
       <<<CAFFE_GET_BLOCKS(dY.size()),
          CAFFE_CUDA_NUM_THREADS,
          0,
@@ -79,8 +79,8 @@ bool AffineChannelGradientOp<float, CUDAContext>::RunOnDevice() {
   return true;
 }
 
-REGISTER_CUDA_OPERATOR(AffineChannel, AffineChannelOp<float, CUDAContext>);
+REGISTER_CUDA_OPERATOR(AffineNd, AffineNdOp<float, CUDAContext>);
 REGISTER_CUDA_OPERATOR(
-    AffineChannelGradient,
-    AffineChannelGradientOp<float, CUDAContext>);
+    AffineNdGradient,
+    AffineNdGradientOp<float, CUDAContext>);
 } // namespace caffe2
